@@ -97,10 +97,6 @@ echo Invoke-WebRequest -Uri $url -OutFile $output >> %download_calc%
 
 
 
-echo Invoke-WebRequest -Uri "https://raw.githubusercontent.com/anic17/SWH/VBSlib_VBSedit.Toolkit/vbsedit32.dll" -OutFile "%swhPath%\DLL\vbsedit32.dll" > "%tmp%\SWH_Setup\OpenMenuDLL.ps1"
-echo Invoke-WebRequest -Uri "https://raw.githubusercontent.com/anic17/SWH/VBSlib_VBSedit.Toolkit/vbsedit64.dll" -OutFile "%swhPath%\DLL\vbsedit64.dll" >> "%tmp%\SWH_Setup\OpenMenuDLL.ps1"
-
-
 ::https://raw.githubusercontent.com/anic17/SWH/data/SWH_Calc.exe
 
 
@@ -115,7 +111,7 @@ echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\Background\shell\Scripting Window
 echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\Background\shell\Scripting Windows Host Console" /v Icon /t REG_SZ /d "%swhPath%\Icon\IconSWH.ico" /f^>nul >> ContextMenuSWH.bat
 echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\Background\shell\Scripting Windows Host Console\command" /f^>nul >> ContextMenuSWH.bat
 echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\Background\shell\Scripting Windows Host Console\command" /d "%swhPath%\SWH.bat" /f^>nul >> ContextMenuSWH.bat
-echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\Background\shell\Scripting Windows Host Console" /v ExtendedSubCommandsKey /t REG_SZ /d "Directory\ContextMenus\Scripting Windows Host Console" ^>nul >> ContextMenuSWH.bat
+echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\Background\shell\Scripting Windows Host Console" /v ExtendedSubCommandsKey /t REG_SZ /d "Directory\ContextMenus\Scripting Windows Host Console" /f ^>nul >> ContextMenuSWH.bat
 echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\Background\shell\Scripting Windows Host Console" /v MUIVerb /t REG_SZ /d "Scripting Windows Host Console"
 echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\ContextMenus\Scripting Windows Host Console\shell\openswh\command" /f^>nul >> ContextMenuSWH.bat
 echo @reg.exe add "HKEY_CLASSES_ROOT\Directory\ContextMenus\Scripting Windows Host Console\shell\openswh" /v Icon /t REG_SZ /d "%swhPath%\Icon\IconSWH.ico" /f^>nul >> ContextMenuSWH.bat
@@ -143,39 +139,6 @@ echo @taskkill /f /fi "windowtitle eq Starting SWH Setup..."^>nul > KillMsgStart
 
 echo #Do NOT modify this file, this file contains installation information;: InstallDir=C:\Users\andre\AppData\Local\ScriptingWindowsHost; UninstallSWH=C:\Users\andre\AppData\Local\ScriptingWindowsHost\Uninstall.bat; Version=bat version ^> %swhPath%\Installed.swhtmp > %tmp%\SWH_Setup\Install.bat
 
-
-echo Set oFSO = CreateObject("Scripting.FileSystemObject") > Setup.vbs
-echo Set oLogFile = oFSO.OpenTextFile("IResult.txt", 2, True) >> Setup.vbs
-echo Set oShell = WScript.CreateObject("WScript.Shell") >> Setup.vbs
-echo strHost = "www.google.com" >> Setup.vbs
-echo strPingCommand = "ping -n 2 -w 1000" ^& strHost >> Setup.vbs
-echo ReturnCode = oShell.Run(strPingCommand, 0 , True) >> Setup.vbs
-echo WScript.Sleep(500) >> Setup.vbs
-echo If ReturnCode ^<^> 0 Then  >> Setup.vbs
-echo 	oLogFile.WriteLine "Internet=Disconnected"  >> Setup.vbs
-echo 	Set objShell = CreateObject("WScript.Shell") >> Setup.vbs
-echo 	objShell.Run "cmd.exe /c KillMsgStartSetup.bat",vbHide >> Setup.vbs
-echo 	nointernet=msgbox("Error! Cannot connect to the Internet. SWH Setup downloads the files to ensure that you install the newest version."^&vbLf^&"If you are connected to the Internet, try running SWH Setup another time."^&vbLf^&vbLf^&"If you have already the portable version, you can install it. Do you want to browse for SWH?",4116,"Cannot connect to the Internet") >> Setup.vbs
-echo 	If nointernet = vbNo Then WScript.Quit >> Setup.vbs
-echo 	Set wShell=CreateObject("WScript.Shell")  >> Setup.vbs
-echo 	Set oExec=wShell.Exec("mshta.exe ""about:<title>Select file</title><input type=file id=FILE><script>FILE.click();new ActiveXObject('Scripting.FileSystemObject').GetStandardStream(1).WriteLine(FILE.value);close();resizeTo(0,0);</script>""")  >> Setup.vbs
-echo 	sFileSelected = oExec.StdOut.ReadLine >> Setup.vbs
-echo 	If Not oFSO.FileExists(sFileSelected) Then >> Setup.vbs
-echo 		msgbox "SWH Setup cannot find the following file:"^&vbLf^&sFileSelected^&"SWH Setup cannot find the following file:"
-echo 	Else >> Setup.vbs
-echo 		oFSO.CopyFile sFileSelected, "%tmp%\SWH.bat" >> Setup.vbs
-echo 	End If >> Setup.vbs
-echo End If >> Setup.vbs
-echo oLogFile.Close >> Setup.vbs
-
-if exist IResult.txt del IResult.txt
-start /wait "wscript.exe" "Setup.vbs"
-for /f "tokens=1,2* delims=," %%I in (IResult.txt) do (set iresultcontent=%%I)
-for %%i in (IResult.txt) do (if %%~zi gtr 20 taskkill /f /fi "windowtitle eq Starting SWH Setup...")
-del Setup.vbs /q
-del IResult.txt /q
-del KillMsgStartSetup.bat /q
-if /i "%iresultcontent%"=="Internet=Disconnected" if not exist "%tmp%\SWH.bat" exit /B
 
 echo @reg.exe add HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ScriptingWindowsHost /v DisplayName /t REG_SZ /d "Scripting Windows Host Console" /f > RegDisplayNameSWH.bat
 
@@ -225,10 +188,7 @@ echo 	objShell.Run "reg.exe add HKCU\Software\ScriptingWindowsHost /v DisableSWH
 echo 	objShell.Run "reg.exe add HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ScriptingWindowsHost",vbHide >> Setup.vbs
 echo 	objShell.Run "reg.exe add HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ScriptingWindowsHost /v InstallLocation /t REG_SZ /d %localappdata%\ScriptingWindowsHost /f",vbHide >> Setup.vbs
 echo 	objShell.Run "cmd.exe /c %tmp%\RegDisplayNameSWH.bat",vbHide >> Setup.vbs
-
-
-
-
+echo 	objShell.Popup "Creating SWH directories and Keys...",1,"Creating SWH directories and Keys...",4160 >> Setup.vbs
 echo 	objShell.Run "reg.exe add HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ScriptingWindowsHost /v NoRepair /t REG_DWORD /d 1 /f",vbHide >> Setup.vbs
 echo 	objShell.Run "reg.exe add HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ScriptingWindowsHost /v NoModify /t REG_DWORD /d 1 /f",vbHide >> Setup.vbs
 echo 	objShell.Run "reg.exe add HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ScriptingWindowsHost /v DisplayVersion /t REG_SZ /d 10.2.2 /f",vbHide >> Setup.vbs
@@ -247,7 +207,6 @@ echo 	objShell.Run "cmd.exe /c mkdir %swhPath%\Temp",vbHide >> Setup.vbs
 echo 	objShell.Run "cmd.exe /c mkdir %swhPath%\Downloads",vbHide >> Setup.vbs
 echo 	objShell.Run "cmd.exe /c mkdir %swhPath%\OldSWH",vbHide >> Setup.vbs
 echo 	objShell.Run "cmd.exe /c mkdir %swhPath%\Icon",vbHide >> Setup.vbs
-echo 	objShell.Run "cmd.exe /c mkdir %swhPath%\DLL",vbHide >> Setup.vbs
 echo 	objShell.Run "cmd.exe /c mkdir %swhPath%\pkg",vbHide >> Setup.vbs
 echo 	objShell.Run "cmd.exe /c mkdir %tmp%\SWH_Setup",vbHide >> Setup.vbs
 echo 	Set FSO = CreateObject("Scripting.FileSystemObject")
@@ -262,6 +221,7 @@ echo 		FSO.CopyFile "%tmp%\SWH.bat","%swhPath%\SWH.bat" >> Setup.vbs
 echo 	Else >> Setup.vbs
 echo 		objShell.Run "powershell.exe %download_ps1%",vbHide,True >> Setup.vbs
 echo 	End If >> Setup.vbs
+echo 	objShell.Run "cmd.exe /c CertUtil -hashfile %swhPath%\SWH.bat SHA256 > %swhPath%\OriginalFileHash",vbHide,True >> Setup.vbs
 if "%rebadinstall%"=="re" goto nextBadIns3
 echo 	CreateObject("WScript.Shell").Popup "Downloading SWH from "^&vblf^&"https://github.com/anic17/SWH/blob/master/SWH.bat...", 1, "Downloading SWH...",4096 >> Setup.vbs
 :nextBadIns3
@@ -324,7 +284,7 @@ echo loop >> Setup.vbs
 rem Clean Temporary SWH files
 :startSetupVBS
 taskkill /f /fi "windowtitle eq Starting SWH Setup..."
-
+start /wait WScript.exe Setup.vbs
 
 
 
